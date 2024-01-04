@@ -11,6 +11,7 @@ btns.forEach((btn)=>{
         resultDisplay.innerText += e.target.id;
     })
 })
+
 const add = (arr) => {
     let index = arr.indexOf('+'); //gets the index of + operator
     // console.log(index);
