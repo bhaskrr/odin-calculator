@@ -1,91 +1,158 @@
-const resultDisplay = document.querySelector('.result');
-let currentExp = (resultDisplay.innerText);
-currentExp = Array.from(currentExp);
+let firstOperand;
+let secondOperand = '';
+let operator = null;
+let currentOperation = null;
+let displayValue = '0';
+let result = null;
 
+const resultDisplay = document.querySelector('.result');
 const expressionDisplay = document.querySelector('.expression');
 
-const btns = document.querySelectorAll('.ip');
+const updateDisplay = (value) => {
+    resultDisplay.textContent = value;
+}
+updateDisplay(displayValue);
 
-btns.forEach((btn)=>{
-    btn.addEventListener('click', (e)=>{
-        resultDisplay.innerText += e.target.id;
+const inputOperand = (value) => {
+    // value = Number(value);
+    if (resultDisplay.textContent == '0') {
+        resultDisplay.textContent = '';
+        resultDisplay.textContent += value;
+        expressionDisplay.textContent += value;
+        firstOperand = resultDisplay.textContent;
+    }
+    else if (resultDisplay.textContent != '0') {
+        if (currentOperation == null) {
+            expressionDisplay.textContent += value;
+            resultDisplay.textContent += value;
+            firstOperand = resultDisplay.textContent;
+        }
+        else if (currentOperation != null) {
+            expressionDisplay.textContent += value;
+            secondOperand += value;
+        }
+    }
+    // console.log(firstOperand, secondOperand);
+}
+
+const inputOperator = (operator) => {
+    if (currentOperation == null) {
+        currentOperation = operator;
+        expressionDisplay.textContent += currentOperation;
+    }
+    else if (currentOperation != null) {
+        if (secondOperand == '') {
+            return;
+        }
+        else if (secondOperand != '') {
+            result = operation(firstOperand, secondOperand, currentOperation);
+            resultDisplay.textContent = result;
+            firstOperand = resultDisplay.textContent;
+            currentOperation = operator;
+            expressionDisplay.textContent += currentOperation;
+            secondOperand = '';
+        }
+    }
+}
+
+const inputDot = (value) => {
+    if (!resultDisplay.innerText.includes('.')) {
+        resultDisplay.innerText += value;
+        expressionDisplay.innerText += value;
+    }
+}
+const equal = () => {
+    if (firstOperand && secondOperand && currentOperation != null) {
+        // console.log(firstOperand, secondOperand, currentOperation); //for debugging
+        resultDisplay.textContent = operation(firstOperand, secondOperand, currentOperation);
+    }
+
+}
+
+const btns = document.querySelectorAll('button');
+btns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+        if (btn.classList.contains('operand')) {
+            inputOperand(btn.textContent);
+        }
+        else if (btn.classList.contains('operator')) {
+            inputOperator(btn.textContent);
+        }
+        else if (btn.classList.contains('dot')) {
+            inputDot(btn.textContent);
+        }
+        else if (btn.classList.contains('equal')) {
+            equal();
+        }
     })
 })
 
-const add = (arr) => {
-    let index = arr.indexOf('+'); //gets the index of + operator
-    // console.log(index);
-    let num1 = parseFloat(arr.slice(0, index).join('')); //gets the array from beginning upto but not including the operator,joins it and makes it a anumber
-    let num2 = parseFloat(arr.slice(index+1, arr.length).join('')); //gets the array from one position ahead the operator upto the last and rest is same
-    // console.log(num1, num2);
-    expressionDisplay.innerText = `${num1} + ${num2}`; //displays the current expression
-    resultDisplay.innerText = num1 + num2;             //displays the current result
+//functions for arithmatic operations
+const add = (a, b) => {
+    return a + b;
 }
 
-const subtract = (arr) => {
-    let index = arr.indexOf('-');
-    let num1 = parseInt(arr.slice(0, index).join(''));
-    let num2 = parseInt(arr.slice(index+1, arr.length).join(''));
-    expressionDisplay.innerText = `${num1} - ${num2}`;
-    resultDisplay.innerText = num1 - num2;
+const subtract = (a, b) => {
+    return a - b;
 }
 
-const multiply = (arr) => {
-    let index = arr.indexOf('x');
-    let num1 = parseInt(arr.slice(0, index).join(''));
-    let num2 = parseInt(arr.slice(index+1, arr.length).join(''));
-    expressionDisplay.innerText = `${num1} x ${num2}`;
-    resultDisplay.innerText = num1 * num2;
+const multiply = (a, b) => {
+    return a * b;
 }
 
-const divide = (arr) => {
-    let index = arr.indexOf('/');
-    let num1 = parseInt(arr.slice(0, index).join(''));
-    let num2 = parseInt(arr.slice(index+1, arr.length).join(''));
-
+const divide = (a, b) => {
     //handling division by zero
-    if(num2 == 0){
-        expressionDisplay.innerText = 'Can not divide by 0';
-        resultDisplay.innerText = '';
-        return;
+    if (b == 0) {
+        expressionDisplay.innerText = 'LMAO';
+        return 0;
     }
-
-    expressionDisplay.innerText = `${num1} / ${num2}`;
-    resultDisplay.innerText = (num1 / num2).toFixed(2); //toFixed function rounds the result upto specified precision
+    return (a / b).toFixed(2); //toFixed function rounds the result upto specified precision
 }
 
-const operation = () =>{
-    currentExp = resultDisplay.innerText;
-    currentExp = Array.from(currentExp); //creates an array
-    // console.log(typeof(currentExp)); //string
-    // currentExp = Array.from(currentExp);
-    // console.log(typeof(currentExp)); //object
-    //console.log(currentExp); //prints the array
-
-    if(currentExp.includes('+')){
-        add(currentExp);
-    }
-    else if(currentExp.includes('-')){
-        subtract(currentExp);
-    }
-    else if(currentExp.includes('x')){
-        multiply(currentExp);
-    }
-    else if(currentExp.includes('/')){
-        divide(currentExp);
+//decides the current arithmatic operation
+const operation = (a, b, operator) => {
+    a = Number(a);
+    b = Number(b);
+    switch (operator) {
+        case '+':
+            return add(a, b);
+        case '−':
+            return subtract(a, b);
+        case '×':
+            return multiply(a, b);
+        case '÷':
+            return divide(a, b);
+        default:
+            return null;
     }
 }
 
+//clear button
 const clearBtn = document.querySelector('#CLEAR');
-clearBtn.addEventListener('click', ()=>{
-    resultDisplay.innerText = '';
-    expressionDisplay.innerText = '';
+clearBtn.addEventListener('click', () => {
+    displayValue = '0';
+    updateDisplay(displayValue);
+    firstOperand = '';
+    secondOperand = '';
+    operator = null;
+    currentOperation = null;
+    result = null;
+    expressionDisplay.textContent = '';
 });
 
+//backspace button
 const deleteBtn = document.querySelector('#DELETE');
-deleteBtn.addEventListener('click', ()=>{
-    resultDisplay.innerText = resultDisplay.innerText.slice(0, -1);
+deleteBtn.addEventListener('click', () => {
+    if (firstOperand && secondOperand == '') {
+        return;
+    }
+    if (resultDisplay.textContent != '0') {
+        resultDisplay.textContent = resultDisplay.textContent.slice(0, -1);
+    }
+    if (expressionDisplay.textContent == '.') {
+        expressionDisplay.textContent = '';
+    }
+    if ((operator == '' || currentOperation == '')) {
+        expressionDisplay.textContent = expressionDisplay.textContent.slice(0, -1);
+    }
 })
-
-const equalBtn = document.querySelector('#equal');
-equalBtn.addEventListener('click', operation);
